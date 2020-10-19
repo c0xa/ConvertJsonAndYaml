@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -10,7 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func FromJsonToYaml(fileFrom string, FileTo string) error {
+func fromJtoY(fileFrom string, FileTo string) error {
 	file, err := ioutil.ReadFile(fileFrom)
 	if err != nil {
 		return err
@@ -19,7 +18,7 @@ func FromJsonToYaml(fileFrom string, FileTo string) error {
 	var u interface{}
 	if err := jsoniter.Unmarshal(file, &u); err != nil {
 		return err
-	} //< Лучше не игнорировать err возвращаемый после парсинга. Вдруг файл файл не корректный
+	}
 	finishResult, _ := yaml.Marshal(&u)
 
 	filename, err := os.OpenFile(FileTo, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
@@ -35,31 +34,30 @@ func FromJsonToYaml(fileFrom string, FileTo string) error {
 	return nil
 }
 
-func FromYamlToJson(fileFrom string, FileTo string) {
+func fromYtoJ(fileFrom string, FileTo string) error {
 	file, err := ioutil.ReadFile(fileFrom)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	var u interface{}
 	err = yaml.Unmarshal(file, &u)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	finishResult, err := jsoniter.Marshal(&u)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	filename, err := os.OpenFile(FileTo, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	filename, err := os.OpenFile(FileTo, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	if err != nil {
-		panic(err)
-	}
-	fmt.Print(finishResult)
-	err = ioutil.WriteFile(FileTo, finishResult, 0644)
-	if err != nil {
-		panic(err.Error())
+		return err
 	}
 	defer filename.Close()
+	if err := ioutil.WriteFile(FileTo, finishResult, os.ModePerm); err != nil {
+		return err
+	}
+	return nil
 }
 
 func main() {
@@ -69,10 +67,12 @@ func main() {
 	to := flag.String("to", "json", "Path to config file")
 	flag.Parse()
 	if *from == "yaml" && *to == "json" {
-		FromYamlToJson(*nameInput, *nameOutput)
+		if err := fromYtoJ(*nameInput, *nameOutput); err != nil {
+			panic(err)
+		}
 	}
 	if *from == "json" && *to == "yaml" {
-		if err := FromJsonToYaml(*nameInput, *nameOutput); err != nil {
+		if err := fromJtoY(*nameInput, *nameOutput); err != nil {
 			panic(err)
 		}
 	}
