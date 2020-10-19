@@ -1,36 +1,38 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 
+	jsoniter "github.com/json-iterator/go"
 	"gopkg.in/yaml.v2"
 )
 
-func FromJsonToYaml(fileFrom string, FileTo string) {
+func FromJsonToYaml(fileFrom string, FileTo string) error {
 	file, err := ioutil.ReadFile(fileFrom)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	var u interface{}
-	json.Unmarshal(file, &u)
-	if err != nil {
-		panic(err)
-	}
-	finishResult, err := yaml.Marshal(&u)
 
-	filename, err := os.OpenFile(FileTo, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	var u interface{}
+	if err := jsoniter.Unmarshal(file, &u); err != nil {
+		return err
+	} //< Лучше не игнорировать err возвращаемый после парсинга. Вдруг файл файл не корректный
+	finishResult, _ := yaml.Marshal(&u)
+
+	filename, err := os.OpenFile(FileTo, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	err = ioutil.WriteFile(FileTo, finishResult, 0644)
-	if err != nil {
-		panic(err.Error())
+	_ = filename.Close()
+
+	if err := ioutil.WriteFile(FileTo, finishResult, os.ModePerm); err != nil {
+		return err
 	}
-	defer filename.Close()
+
+	return nil
 }
 
 func FromYamlToJson(fileFrom string, FileTo string) {
@@ -39,11 +41,14 @@ func FromYamlToJson(fileFrom string, FileTo string) {
 		panic(err)
 	}
 	var u interface{}
-	yaml.Unmarshal([]byte(file), &u)
+	err = yaml.Unmarshal(file, &u)
 	if err != nil {
 		panic(err)
 	}
-	finishResult, err := json.Marshal(u)
+	finishResult, err := jsoniter.Marshal(&u)
+	if err != nil {
+		panic(err)
+	}
 
 	filename, err := os.OpenFile(FileTo, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -67,6 +72,8 @@ func main() {
 		FromYamlToJson(*nameInput, *nameOutput)
 	}
 	if *from == "json" && *to == "yaml" {
-		FromJsonToYaml(*nameInput, *nameOutput)
+		if err := FromJsonToYaml(*nameInput, *nameOutput); err != nil {
+			panic(err)
+		}
 	}
 }
