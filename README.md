@@ -4,20 +4,18 @@
 - [:ru: RUS](./README.ru.md) - Русская документация
 - [:uk: ENG](./README.md) - English documentation
 
-# О проекте
-Это небольшая утилита для конвертации файлов,
-написанная на Goland. Она позволяет конвертировать из JSON в YAML и из 
-YAML  в JSON 
-с помощью аргументов командной строки.
+# About
+This is small utility for conversion files written on Goland.
+The this utility allows you to convert from json to yaml or  
+from yaml to json with command-line arguments.
 
-# Поддерживаемые типы
+# Supported types
 
 - [x] Yaml
 - [x] Json
 
-# Примеры
+# Examples
 
-Формально:
 ```
 convert --input file.yml --output file.json --from yaml --to json
 ```
