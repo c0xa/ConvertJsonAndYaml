@@ -21,5 +21,5 @@ go run . --input data.yaml --output data.json --from yaml --to json
 ```
 
 ```
-go run . --input data.json--output data.yml   --from json --to yaml 
+go run . --input data.json --output data.yaml --from json --to yaml 
 ```
