@@ -5,8 +5,8 @@
 - [:uk: ENG](./README.md) - English documentation
 
 # About
-This is small utility for conversion files written on Goland.
-The this utility allows you to convert from json to yaml or  
+This is small application for conversion files written on Goland.
+This application allows you to convert from json to yaml or  
 from yaml to json with command-line arguments.
 
 # Supported types
